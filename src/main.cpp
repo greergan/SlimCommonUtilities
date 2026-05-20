@@ -15,6 +15,7 @@ void slim::common::utilities::replace_all(std::string& _string, const std::strin
 
 std::string slim::common::utilities::to_lower(std::string_view _string) {
 	std::string return_string;
+	return_string.resize(_string.size());
 	std::transform(_string.begin(), _string.end(), return_string.begin(), [](unsigned char c){ return std::tolower(c); });
 	return return_string;
 }
