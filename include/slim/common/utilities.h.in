@@ -1,0 +1,5 @@
+#pragma once
+#ifndef SLIM__COMMON__UTILITIES__H
+#define SLIM__COMMON__UTILITIES__H
+
+#endif // SLIM__COMMON__UTILITIES__H
