@@ -1,5 +1,14 @@
-#pragma once
 #ifndef SLIM__COMMON__UTILITIES__H
 #define SLIM__COMMON__UTILITIES__H
+#define SLIMCOMMONUTILITIES_VERSION "@SLIMCOMMONUTILITIES_VERSION@"
+#define SLIMCOMMONUTILITIES_GIT_HASH "@SLIMCOMMONUTILITIES_GIT_HASH@"
+#include <optional>
+#include <string>
+#include <string_view>
+
+namespace slim::common::utilities {
+	std::string to_lower(std::string_view _string);
+	void replace_all(std::string& _string, const std::string& _original, const std::string& _replacement);
+}
 
 #endif // SLIM__COMMON__UTILITIES__H
