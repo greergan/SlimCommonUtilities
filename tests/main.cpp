@@ -487,4 +487,82 @@ TEST_CASE("trim", "[trim]") {
         trim(s);
         REQUIRE(s == "hello   world");
     }
+
+    SECTION("out-parameter overload trims into a string without mutating the source view") {
+        std::string_view s = "  hello  ";
+        std::string out;
+        trim(s, out);
+        REQUIRE(out == "hello");
+        REQUIRE(s == "  hello  ");
+    }
+
+    SECTION("out-parameter overload on all-whitespace input yields an empty string") {
+        std::string out;
+        trim(std::string_view("    "), out);
+        REQUIRE(out.empty());
+    }
+
+    SECTION("out-parameter overload overwrites prior content") {
+        std::string out = "this content should be replaced entirely";
+        trim(std::string_view("  hi  "), out);
+        REQUIRE(out == "hi");
+    }
+}
+
+// ─── split ───────────────────────────────────────────────────────────────────
+
+TEST_CASE("split", "[split]") {
+    using slim::common::utilities::split;
+
+    SECTION("basic split on delimiter") {
+        auto tokens = split("a;b;c", ';');
+        REQUIRE(tokens.size() == 3);
+        REQUIRE(tokens[0] == "a");
+        REQUIRE(tokens[1] == "b");
+        REQUIRE(tokens[2] == "c");
+    }
+
+    SECTION("no delimiter present returns single token") {
+        auto tokens = split("hello", ';');
+        REQUIRE(tokens.size() == 1);
+        REQUIRE(tokens[0] == "hello");
+    }
+
+    SECTION("empty string returns no tokens") {
+        auto tokens = split("", ';');
+        REQUIRE(tokens.empty());
+    }
+
+    SECTION("consecutive delimiters produce no empty tokens") {
+        auto tokens = split("a;;b", ';');
+        REQUIRE(tokens.size() == 2);
+        REQUIRE(tokens[0] == "a");
+        REQUIRE(tokens[1] == "b");
+    }
+
+    SECTION("leading delimiter is skipped") {
+        auto tokens = split(";a;b", ';');
+        REQUIRE(tokens.size() == 2);
+        REQUIRE(tokens[0] == "a");
+        REQUIRE(tokens[1] == "b");
+    }
+
+    SECTION("trailing delimiter produces no trailing empty token") {
+        auto tokens = split("a;b;", ';');
+        REQUIRE(tokens.size() == 2);
+        REQUIRE(tokens[0] == "a");
+        REQUIRE(tokens[1] == "b");
+    }
+
+    SECTION("string of only delimiters returns no tokens") {
+        auto tokens = split(";;;", ';');
+        REQUIRE(tokens.empty());
+    }
+
+    SECTION("different delimiter character") {
+        auto tokens = split("name=value", '=');
+        REQUIRE(tokens.size() == 2);
+        REQUIRE(tokens[0] == "name");
+        REQUIRE(tokens[1] == "value");
+    }
 }

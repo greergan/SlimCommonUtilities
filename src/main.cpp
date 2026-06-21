@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <string_view>
+#include <vector>
 #include <slim/common/utilities.h>
 
 namespace slim::common::utilities {
@@ -112,6 +113,19 @@ void replace_all(std::string& _string, std::string_view _original, std::string_v
     }
 }
 
+std::vector<std::string_view> split(std::string_view s, char delim) noexcept {
+    std::vector<std::string_view> tokens;
+    size_t start = 0;
+    size_t end = s.find(delim);
+    while (end != std::string_view::npos) {
+        if (start != end) tokens.push_back(s.substr(start, end - start));
+        start = end + 1;
+        end = s.find(delim, start);
+    }
+    if (start < s.size()) tokens.push_back(s.substr(start));
+    return tokens;
+}
+
 void to_lower(std::string_view _string, std::string& out) noexcept {
     out.resize(_string.size());
     std::transform(_string.begin(), _string.end(), out.begin(), [](unsigned char c) {
@@ -122,6 +136,11 @@ void to_lower(std::string_view _string, std::string& out) noexcept {
 void trim(std::string_view& s) noexcept {
     while (!s.empty() && ascii.is_space[static_cast<unsigned char>(s.front())]) s.remove_prefix(1);
     while (!s.empty() && ascii.is_space[static_cast<unsigned char>(s.back())]) s.remove_suffix(1);
+}
+
+void trim(std::string_view s, std::string& out) noexcept {
+    trim(s);
+    out.assign(s);
 }
 
 } // namespace slim::common::utilities

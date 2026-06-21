@@ -6,6 +6,7 @@
 
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace slim::common::utilities {
     std::size_t count_digits(std::uint_least64_t n) noexcept;
@@ -19,8 +20,10 @@ namespace slim::common::utilities {
     bool is_space(char c) noexcept;
     int month_abbr_to_int(std::string_view s) noexcept;
     void replace_all(std::string& _string, std::string_view _original, std::string_view _replacement) noexcept;
+    std::vector<std::string_view> split(std::string_view s, char delim) noexcept;
     void to_lower(std::string_view _string, std::string& out) noexcept;
     void trim(std::string_view& s) noexcept;
+    void trim(std::string_view s, std::string& out) noexcept;
 }
 
 #endif // SLIM__COMMON__UTILITIES__H
