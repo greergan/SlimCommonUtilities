@@ -6,7 +6,7 @@
 
 A lightweight collection of small, dependency-free C++ string and numeric helper functions.  
 Part of the [SlimCommon](https://codeberg.org/greergan/SlimCommon) library.  
-Used internally by other Slim* libraries, including [SlimCommonHttpCookie](https://codeberg.org/greergan/SlimCommonHttpCookie).  
+Used internally by different [SlimCommon](https://codeberg.org/greergan/SlimCommon) micro-libraries.  
 Built using [SlimLibraryPackager](https://codeberg.org/greergan/SlimLibraryPackager).  
 CI/CD supplied by unified workflows provided by [SlimLibraryPackager](https://codeberg.org/greergan/SlimLibraryPackager).
 
