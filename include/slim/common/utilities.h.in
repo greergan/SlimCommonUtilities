@@ -9,9 +9,14 @@
 
 namespace slim::common::utilities {
     std::size_t count_digits(std::uint_least64_t n) noexcept;
-    void get_bool(std::string_view s, bool& b) noexcept;
+    bool get_bool(std::string_view s, bool& b) noexcept;
     bool iequals(std::string_view a, std::string_view b) noexcept;
     bool iiequals(std::string_view a, std::string_view b) noexcept;
+    bool is_alnum(char c) noexcept;
+    bool is_cookie_char(char c) noexcept;
+    bool is_date_delimiter(char c) noexcept;
+    bool is_digit(char c) noexcept;
+    bool is_space(char c) noexcept;
     int month_abbr_to_int(std::string_view s) noexcept;
     void replace_all(std::string& _string, std::string_view _original, std::string_view _replacement) noexcept;
     void to_lower(std::string_view _string, std::string& out) noexcept;

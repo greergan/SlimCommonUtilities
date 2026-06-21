@@ -19,6 +19,11 @@ CI/CD supplied by unified workflows provided by [SlimLibraryPackager](https://co
   - [get_bool](#get_bool)
   - [iequals](#iequals)
   - [iiequals](#iiequals)
+  - [is_alnum](#is_alnum)
+  - [is_cookie_char](#is_cookie_char)
+  - [is_date_delimiter](#is_date_delimiter)
+  - [is_digit](#is_digit)
+  - [is_space](#is_space)
   - [month_abbr_to_int](#month_abbr_to_int)
   - [replace_all](#replace_all)
   - [to_lower](#to_lower)
@@ -45,6 +50,7 @@ This library provides a small set of free functions used across the Slim* librar
 | Digit counting | Fast digit count for unsigned 64-bit integers |
 | Boolean parsing | String-to-bool conversion for `TRUE`/`true`/`FALSE`/`false` |
 | Case-insensitive comparison | Two variants (`iequals` / `iiequals`) for comparing strings |
+| Character classification | Single-character predicates for alphanumerics, cookie-octets, date delimiters, digits, and whitespace |
 | Month abbreviation lookup | Converts three-letter month abbreviations to their numeric index |
 | In-place substring replacement | Replaces all occurrences of a substring within a string |
 | Lowercasing | Produces a lowercased copy of a string |
@@ -69,10 +75,10 @@ Returns the number of base-10 digits in `n`. `0` is treated as a single digit.
 ### get_bool
 
 ```cpp
-void get_bool(std::string_view s, bool& b) noexcept;
+bool get_bool(std::string_view s, bool& b) noexcept;
 ```
 
-Parses `s` as a boolean and writes the result into `b`. Only accepts `"TRUE"`, `"true"`, `"FALSE"`, or `"false"`. `b` is left unchanged if `s` is none of these.
+Parses `s` as a boolean and writes the result into `b`. Only accepts `"TRUE"`, `"true"`, `"FALSE"`, or `"false"` (case-insensitive, with surrounding whitespace trimmed). Returns `true` on success; returns `false` and leaves `b` unchanged if `s` is none of these.
 
 [↑ Top](#table-of-contents)
 
@@ -96,13 +102,63 @@ Case-insensitive equality comparison. No assumption on either argument's case.
 
 [↑ Top](#table-of-contents)
 
+### is_alnum
+
+```cpp
+bool is_alnum(char c) noexcept;
+```
+
+Returns `true` if `c` is an ASCII letter (`a`–`z`, `A`–`Z`) or digit (`0`–`9`).
+
+[↑ Top](#table-of-contents)
+
+### is_cookie_char
+
+```cpp
+bool is_cookie_char(char c) noexcept;
+```
+
+Returns `true` if `c` is a valid unquoted cookie-octet per RFC 6265 — printable ASCII excluding control characters, space, double quote, comma, semicolon, and backslash.
+
+[↑ Top](#table-of-contents)
+
+### is_date_delimiter
+
+```cpp
+bool is_date_delimiter(char c) noexcept;
+```
+
+Returns `true` if `c` is a delimiter character used when tokenizing HTTP-date strings (e.g. spaces, hyphens, commas). Colon is deliberately excluded, since it separates components within a single `HH:MM:SS` time token rather than separating tokens.
+
+[↑ Top](#table-of-contents)
+
+### is_digit
+
+```cpp
+bool is_digit(char c) noexcept;
+```
+
+Returns `true` if `c` is an ASCII digit (`0`–`9`).
+
+[↑ Top](#table-of-contents)
+
+### is_space
+
+```cpp
+bool is_space(char c) noexcept;
+```
+
+Returns `true` if `c` is one of the recognized ASCII whitespace characters: space, `\t`, `\r`, `\n`, `\v`, or `\f`.
+
+[↑ Top](#table-of-contents)
+
 ### month_abbr_to_int
 
 ```cpp
 int month_abbr_to_int(std::string_view s) noexcept;
 ```
 
-Converts a three-letter month abbreviation (e.g. `"Jan"`, `"Dec"`) to its 1-based month number. Returns `-1` when `s` is not a recognized abbreviation.
+Converts a three-letter month abbreviation (e.g. `"Jan"`, `"Dec"`) to its 0-based month index (`"Jan"` → `0`, `"Dec"` → `11`). Only the first three characters of `s` are considered. Returns `-1` when `s` is shorter than three characters or not a recognized abbreviation.
 
 [↑ Top](#table-of-contents)
 
@@ -160,6 +216,11 @@ none
 using slim::common::utilities::count_digits;
 using slim::common::utilities::get_bool;
 using slim::common::utilities::iequals;
+using slim::common::utilities::is_alnum;
+using slim::common::utilities::is_cookie_char;
+using slim::common::utilities::is_date_delimiter;
+using slim::common::utilities::is_digit;
+using slim::common::utilities::is_space;
 using slim::common::utilities::month_abbr_to_int;
 using slim::common::utilities::replace_all;
 using slim::common::utilities::to_lower;
@@ -170,13 +231,20 @@ std::size_t digits = count_digits(31536000); // -> 8
 
 // Boolean parsing
 bool flag = false;
-get_bool("true", flag); // flag -> true
+bool parsed = get_bool("true", flag); // parsed -> true, flag -> true
 
 // Case-insensitive comparison
 bool same = iequals("Session", "session"); // -> true
 
+// Character classification
+bool a1 = is_alnum('q');           // -> true
+bool a2 = is_cookie_char('"');     // -> false
+bool a3 = is_date_delimiter(':');  // -> false
+bool a4 = is_digit('7');           // -> true
+bool a5 = is_space('\t');          // -> true
+
 // Month abbreviation lookup
-int month = month_abbr_to_int("Feb"); // -> 2
+int month = month_abbr_to_int("Feb"); // -> 1
 
 // In-place substring replacement
 std::string s = "a-b-c";

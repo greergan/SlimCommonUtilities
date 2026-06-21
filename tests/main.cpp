@@ -41,35 +41,35 @@ TEST_CASE("get_bool", "[get_bool]") {
 
     SECTION("lowercase true") {
         bool b = false;
-        get_bool("true", b);
+        REQUIRE(get_bool("true", b));
         REQUIRE(b == true);
     }
 
     SECTION("lowercase false") {
         bool b = true;
-        get_bool("false", b);
+        REQUIRE(get_bool("false", b));
         REQUIRE(b == false);
     }
 
     SECTION("mixed case true") {
         bool b = false;
-        get_bool("TrUe", b);
+        REQUIRE(get_bool("TrUe", b));
         REQUIRE(b == true);
     }
 
     SECTION("surrounding whitespace is trimmed") {
         bool b = false;
-        get_bool("  true  ", b);
+        REQUIRE(get_bool("  true  ", b));
         REQUIRE(b == true);
     }
 
-    SECTION("unrecognized value leaves b unchanged") {
+    SECTION("unrecognized value returns false and leaves b unchanged") {
         bool b = true;
-        get_bool("not-a-bool", b);
+        REQUIRE_FALSE(get_bool("not-a-bool", b));
         REQUIRE(b == true);
 
         bool b2 = false;
-        get_bool("not-a-bool", b2);
+        REQUIRE_FALSE(get_bool("not-a-bool", b2));
         REQUIRE(b2 == false);
     }
 }
@@ -127,6 +127,163 @@ TEST_CASE("iiequals", "[iiequals]") {
 
     SECTION("empty strings are equal") {
         REQUIRE(iiequals("", ""));
+    }
+}
+
+// ─── is_alnum ────────────────────────────────────────────────────────────────
+
+TEST_CASE("is_alnum", "[is_alnum]") {
+    using slim::common::utilities::is_alnum;
+
+    SECTION("lowercase letters") {
+        REQUIRE(is_alnum('a'));
+        REQUIRE(is_alnum('z'));
+    }
+
+    SECTION("uppercase letters") {
+        REQUIRE(is_alnum('A'));
+        REQUIRE(is_alnum('Z'));
+    }
+
+    SECTION("digits") {
+        REQUIRE(is_alnum('0'));
+        REQUIRE(is_alnum('9'));
+    }
+
+    SECTION("hyphen is not alnum") {
+        REQUIRE_FALSE(is_alnum('-'));
+    }
+
+    SECTION("punctuation is not alnum") {
+        REQUIRE_FALSE(is_alnum('.'));
+        REQUIRE_FALSE(is_alnum('_'));
+    }
+
+    SECTION("space is not alnum") {
+        REQUIRE_FALSE(is_alnum(' '));
+    }
+}
+
+// ─── is_cookie_char ──────────────────────────────────────────────────────────
+
+TEST_CASE("is_cookie_char", "[is_cookie_char]") {
+    using slim::common::utilities::is_cookie_char;
+
+    SECTION("typical alnum chars are valid") {
+        REQUIRE(is_cookie_char('a'));
+        REQUIRE(is_cookie_char('Z'));
+        REQUIRE(is_cookie_char('5'));
+    }
+
+    SECTION("0x21 boundary is valid") {
+        REQUIRE(is_cookie_char(static_cast<char>(0x21)));
+    }
+
+    SECTION("double quote (0x22) is invalid") {
+        REQUIRE_FALSE(is_cookie_char('"'));
+    }
+
+    SECTION("comma (0x2C) is invalid") {
+        REQUIRE_FALSE(is_cookie_char(','));
+    }
+
+    SECTION("semicolon (0x3B) is invalid") {
+        REQUIRE_FALSE(is_cookie_char(';'));
+    }
+
+    SECTION("backslash (0x5C) is invalid") {
+        REQUIRE_FALSE(is_cookie_char('\\'));
+    }
+
+    SECTION("0x7E boundary is valid") {
+        REQUIRE(is_cookie_char(static_cast<char>(0x7E)));
+    }
+
+    SECTION("space (0x20) is invalid") {
+        REQUIRE_FALSE(is_cookie_char(' '));
+    }
+
+    SECTION("DEL (0x7F) is invalid") {
+        REQUIRE_FALSE(is_cookie_char(static_cast<char>(0x7F)));
+    }
+}
+
+// ─── is_date_delimiter ───────────────────────────────────────────────────────
+
+TEST_CASE("is_date_delimiter", "[is_date_delimiter]") {
+    using slim::common::utilities::is_date_delimiter;
+
+    SECTION("tab is a delimiter") {
+        REQUIRE(is_date_delimiter('\t'));
+    }
+
+    SECTION("space is a delimiter") {
+        REQUIRE(is_date_delimiter(' '));
+    }
+
+    SECTION("hyphen and slash are delimiters") {
+        REQUIRE(is_date_delimiter('-'));
+        REQUIRE(is_date_delimiter('/'));
+    }
+
+    SECTION("comma is a delimiter") {
+        REQUIRE(is_date_delimiter(','));
+    }
+
+    SECTION("colon is not a delimiter (used as time-token separator)") {
+        REQUIRE_FALSE(is_date_delimiter(':'));
+    }
+
+    SECTION("letters are not delimiters") {
+        REQUIRE_FALSE(is_date_delimiter('a'));
+        REQUIRE_FALSE(is_date_delimiter('Z'));
+    }
+
+    SECTION("digits are not delimiters") {
+        REQUIRE_FALSE(is_date_delimiter('5'));
+    }
+}
+
+// ─── is_digit ────────────────────────────────────────────────────────────────
+
+TEST_CASE("is_digit", "[is_digit]") {
+    using slim::common::utilities::is_digit;
+
+    SECTION("digit characters") {
+        REQUIRE(is_digit('0'));
+        REQUIRE(is_digit('5'));
+        REQUIRE(is_digit('9'));
+    }
+
+    SECTION("letters are not digits") {
+        REQUIRE_FALSE(is_digit('a'));
+        REQUIRE_FALSE(is_digit('Z'));
+    }
+
+    SECTION("symbols are not digits") {
+        REQUIRE_FALSE(is_digit('-'));
+        REQUIRE_FALSE(is_digit('.'));
+    }
+}
+
+// ─── is_space ────────────────────────────────────────────────────────────────
+
+TEST_CASE("is_space", "[is_space]") {
+    using slim::common::utilities::is_space;
+
+    SECTION("recognized whitespace characters") {
+        REQUIRE(is_space(' '));
+        REQUIRE(is_space('\t'));
+        REQUIRE(is_space('\r'));
+        REQUIRE(is_space('\n'));
+        REQUIRE(is_space('\v'));
+        REQUIRE(is_space('\f'));
+    }
+
+    SECTION("non-whitespace characters") {
+        REQUIRE_FALSE(is_space('a'));
+        REQUIRE_FALSE(is_space('0'));
+        REQUIRE_FALSE(is_space('-'));
     }
 }
 

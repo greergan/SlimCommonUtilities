@@ -47,10 +47,11 @@ std::size_t count_digits(std::uint_least64_t n) noexcept {
     return digits + 1;
 }
 
-void get_bool(std::string_view s, bool& b) noexcept {
+bool get_bool(std::string_view s, bool& b) noexcept {
     trim(s);
-    if (iequals(s, "true")) { b = true; return; }
-    if (iequals(s, "false")) { b = false; return; }
+    if (iequals(s, "true")) { b = true; return true; }
+    if (iequals(s, "false")) { b = false; return true; }
+    return false;
 }
 
 bool iequals(std::string_view a, std::string_view b) noexcept {
@@ -65,6 +66,26 @@ bool iiequals(std::string_view a, std::string_view b) noexcept {
     for (size_t i = 0; i < a.size(); ++i)
         if (ascii.to_lower[static_cast<unsigned char>(a[i])] != ascii.to_lower[static_cast<unsigned char>(b[i])]) return false;
     return true;
+}
+
+bool is_alnum(char c) noexcept {
+    return ascii.is_alnum[static_cast<unsigned char>(c)];
+}
+
+bool is_cookie_char(char c) noexcept {
+    return ascii.is_cookie_char[static_cast<unsigned char>(c)];
+}
+
+bool is_date_delimiter(char c) noexcept {
+    return ascii.is_date_delimiter[static_cast<unsigned char>(c)];
+}
+
+bool is_digit(char c) noexcept {
+    return ascii.is_digit[static_cast<unsigned char>(c)];
+}
+
+bool is_space(char c) noexcept {
+    return ascii.is_space[static_cast<unsigned char>(c)];
 }
 
 int month_abbr_to_int(std::string_view s) noexcept {
