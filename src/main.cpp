@@ -36,7 +36,7 @@ struct AsciiTables {
 constexpr AsciiTables ascii{};
 } // namespace
 
-constexpr std::size_t count_digits(std::uint_least64_t n) noexcept {
+std::size_t count_digits(std::uint_least64_t n) noexcept {
     if (n == 0) return 1;
     std::size_t digits = 0;
     if (n >= 1000000000000000000ULL) { digits += 18; n /= 1000000000000000000ULL; }
@@ -47,27 +47,27 @@ constexpr std::size_t count_digits(std::uint_least64_t n) noexcept {
     return digits + 1;
 }
 
-constexpr void get_bool(std::string_view s, bool& b) noexcept {
+void get_bool(std::string_view s, bool& b) noexcept {
     trim(s);
     if (iequals(s, "true")) { b = true; return; }
     if (iequals(s, "false")) { b = false; return; }
 }
 
-constexpr bool iequals(std::string_view a, std::string_view b) noexcept {
+bool iequals(std::string_view a, std::string_view b) noexcept {
     if (a.size() != b.size()) return false;
     for (size_t i = 0; i < a.size(); ++i)
         if (ascii.to_lower[static_cast<unsigned char>(a[i])] != static_cast<unsigned char>(b[i])) return false;
     return true;
 }
 
-constexpr bool iiequals(std::string_view a, std::string_view b) noexcept {
+bool iiequals(std::string_view a, std::string_view b) noexcept {
     if (a.size() != b.size()) return false;
     for (size_t i = 0; i < a.size(); ++i)
         if (ascii.to_lower[static_cast<unsigned char>(a[i])] != ascii.to_lower[static_cast<unsigned char>(b[i])]) return false;
     return true;
 }
 
-constexpr int month_abbr_to_int(std::string_view s) noexcept {
+int month_abbr_to_int(std::string_view s) noexcept {
     if (s.size() < 3) return -1;
     uint32_t val = (static_cast<uint32_t>(ascii.to_lower[static_cast<unsigned char>(s[0])]) << 16) |
                    (static_cast<uint32_t>(ascii.to_lower[static_cast<unsigned char>(s[1])]) << 8) |
@@ -91,14 +91,14 @@ void replace_all(std::string& _string, std::string_view _original, std::string_v
     }
 }
 
-inline void to_lower(std::string_view _string, std::string& out) noexcept {
+void to_lower(std::string_view _string, std::string& out) noexcept {
     out.resize(_string.size());
     std::transform(_string.begin(), _string.end(), out.begin(), [](unsigned char c) {
         return ascii.to_lower[c];
     });
 }
 
-constexpr void trim(std::string_view& s) noexcept {
+void trim(std::string_view& s) noexcept {
     while (!s.empty() && ascii.is_space[static_cast<unsigned char>(s.front())]) s.remove_prefix(1);
     while (!s.empty() && ascii.is_space[static_cast<unsigned char>(s.back())]) s.remove_suffix(1);
 }
