@@ -1,14 +1,21 @@
 #ifndef SLIM__COMMON__UTILITIES__H
 #define SLIM__COMMON__UTILITIES__H
+
 #define SLIMCOMMONUTILITIES_VERSION "@SLIMCOMMONUTILITIES_VERSION@"
 #define SLIMCOMMONUTILITIES_GIT_HASH "@SLIMCOMMONUTILITIES_GIT_HASH@"
-#include <optional>
+
 #include <string>
 #include <string_view>
 
 namespace slim::common::utilities {
-	std::string to_lower(std::string_view _string);
-	void replace_all(std::string& _string, const std::string& _original, const std::string& _replacement);
+    constexpr std::size_t count_digits(std::uint_least64_t n) noexcept;
+    constexpr void get_bool(std::string_view s, bool& b) noexcept;
+    constexpr bool iequals(std::string_view a, std::string_view b) noexcept;
+    constexpr bool iiequals(std::string_view a, std::string_view b) noexcept;
+    constexpr int month_abbr_to_int(std::string_view s) noexcept;
+    void replace_all(std::string& _string, std::string_view _original, std::string_view _replacement) noexcept;
+    inline void to_lower(std::string_view _string, std::string& out) noexcept;
+    constexpr void trim(std::string_view& s) noexcept;
 }
 
 #endif // SLIM__COMMON__UTILITIES__H
