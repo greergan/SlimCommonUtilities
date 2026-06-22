@@ -20,6 +20,7 @@ CI/CD supplied by unified workflows provided by [SlimLibraryPackager](https://co
   - [iequals](#iequals)
   - [iiequals](#iiequals)
   - [is_alnum](#is_alnum)
+  - [is_alpha](#is_alpha)
   - [is_cookie_char](#is_cookie_char)
   - [is_date_delimiter](#is_date_delimiter)
   - [is_digit](#is_digit)
@@ -51,7 +52,7 @@ This library provides a small set of free functions used across the Slim* librar
 | Digit counting | Fast digit count for unsigned 64-bit integers |
 | Boolean parsing | String-to-bool conversion for `TRUE`/`true`/`FALSE`/`false` |
 | Case-insensitive comparison | Two variants (`iequals` / `iiequals`) for comparing strings |
-| Character classification | Single-character predicates for alphanumerics, cookie-octets, date delimiters, digits, and whitespace |
+| Character classification | Single-character predicates for alphabetics, alphanumerics, cookie-octets, date delimiters, digits, and whitespace |
 | Month abbreviation lookup | Converts three-letter month abbreviations to their numeric index |
 | In-place substring replacement | Replaces all occurrences of a substring within a string |
 | Delimiter splitting | Splits a view into non-empty tokens on a delimiter character |
@@ -111,6 +112,16 @@ bool is_alnum(char c) noexcept;
 ```
 
 Returns `true` if `c` is an ASCII letter (`a`–`z`, `A`–`Z`) or digit (`0`–`9`).
+
+[↑ Top](#table-of-contents)
+
+### is_alpha
+
+```cpp
+bool is_alpha(char c) noexcept;
+```
+
+Returns `true` if `c` is an ASCII letter (`a`–`z`, `A`–`Z`).
 
 [↑ Top](#table-of-contents)
 
@@ -232,6 +243,7 @@ using slim::common::utilities::count_digits;
 using slim::common::utilities::get_bool;
 using slim::common::utilities::iequals;
 using slim::common::utilities::is_alnum;
+using slim::common::utilities::is_alpha;
 using slim::common::utilities::is_cookie_char;
 using slim::common::utilities::is_date_delimiter;
 using slim::common::utilities::is_digit;
@@ -254,10 +266,12 @@ bool same = iequals("Session", "session"); // -> true
 
 // Character classification
 bool a1 = is_alnum('q');           // -> true
-bool a2 = is_cookie_char('"');     // -> false
-bool a3 = is_date_delimiter(':');  // -> false
-bool a4 = is_digit('7');           // -> true
-bool a5 = is_space('\t');          // -> true
+bool a2 = is_alpha('q');           // -> true
+bool a3 = is_alpha('7');           // -> false
+bool a4 = is_cookie_char('"');     // -> false
+bool a5 = is_date_delimiter(':');  // -> false
+bool a6 = is_digit('7');           // -> true
+bool a7 = is_space('\t');          // -> true
 
 // Month abbreviation lookup
 int month = month_abbr_to_int("Feb"); // -> 1

@@ -164,6 +164,40 @@ TEST_CASE("is_alnum", "[is_alnum]") {
     }
 }
 
+// ─── is_alpha ────────────────────────────────────────────────────────────────
+
+TEST_CASE("is_alpha", "[is_alpha]") {
+    using slim::common::utilities::is_alpha;
+
+    SECTION("lowercase letters") {
+        REQUIRE(is_alpha('a'));
+        REQUIRE(is_alpha('z'));
+    }
+
+    SECTION("uppercase letters") {
+        REQUIRE(is_alpha('A'));
+        REQUIRE(is_alpha('Z'));
+    }
+
+    SECTION("digits are not alpha") {
+        REQUIRE_FALSE(is_alpha('0'));
+        REQUIRE_FALSE(is_alpha('9'));
+    }
+
+    SECTION("hyphen is not alpha") {
+        REQUIRE_FALSE(is_alpha('-'));
+    }
+
+    SECTION("punctuation is not alpha") {
+        REQUIRE_FALSE(is_alpha('.'));
+        REQUIRE_FALSE(is_alpha('_'));
+    }
+
+    SECTION("space is not alpha") {
+        REQUIRE_FALSE(is_alpha(' '));
+    }
+}
+
 // ─── is_cookie_char ──────────────────────────────────────────────────────────
 
 TEST_CASE("is_cookie_char", "[is_cookie_char]") {

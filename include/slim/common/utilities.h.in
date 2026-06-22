@@ -4,6 +4,7 @@
 #define SLIMCOMMONUTILITIES_VERSION "@SLIMCOMMONUTILITIES_VERSION@"
 #define SLIMCOMMONUTILITIES_GIT_HASH "@SLIMCOMMONUTILITIES_GIT_HASH@"
 
+#include <cstdint>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -14,6 +15,7 @@ namespace slim::common::utilities {
     bool iequals(std::string_view a, std::string_view b) noexcept;
     bool iiequals(std::string_view a, std::string_view b) noexcept;
     bool is_alnum(char c) noexcept;
+    bool is_alpha(char c) noexcept;
     bool is_cookie_char(char c) noexcept;
     bool is_date_delimiter(char c) noexcept;
     bool is_digit(char c) noexcept;

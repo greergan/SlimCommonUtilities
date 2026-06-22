@@ -12,6 +12,7 @@ namespace {
 struct AsciiTables {
     std::array<char, 256> to_lower{};
     std::array<bool, 256> is_alnum{};
+    std::array<bool, 256> is_alpha{};
     std::array<bool, 256> is_digit{};
     std::array<bool, 256> is_space{};
     std::array<bool, 256> is_cookie_char{};
@@ -20,7 +21,8 @@ struct AsciiTables {
     constexpr AsciiTables() noexcept {
         for (size_t i = 0; i < 256; ++i) {
             to_lower[i] = (i >= 'A' && i <= 'Z') ? static_cast<char>(i + 32) : static_cast<char>(i);
-            is_alnum[i] = (i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z') || (i >= '0' && i <= '9');
+            is_alpha[i] = (i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z');
+            is_alnum[i] = is_alpha[i] || (i >= '0' && i <= '9');
             is_digit[i] = (i >= '0' && i <= '9');
             is_space[i] = (i == ' ' || i == '\t' || i == '\r' || i == '\n' || i == '\v' || i == '\f');
 
@@ -71,6 +73,10 @@ bool iiequals(std::string_view a, std::string_view b) noexcept {
 
 bool is_alnum(char c) noexcept {
     return ascii.is_alnum[static_cast<unsigned char>(c)];
+}
+
+bool is_alpha(char c) noexcept {
+    return ascii.is_alpha[static_cast<unsigned char>(c)];
 }
 
 bool is_cookie_char(char c) noexcept {
