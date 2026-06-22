@@ -26,6 +26,7 @@ CI/CD supplied by unified workflows provided by [SlimLibraryPackager](https://co
   - [is_space](#is_space)
   - [month_abbr_to_int](#month_abbr_to_int)
   - [replace_all](#replace_all)
+  - [split](#split)
   - [to_lower](#to_lower)
   - [trim](#trim)
 - [Building](#building)
@@ -53,6 +54,7 @@ This library provides a small set of free functions used across the Slim* librar
 | Character classification | Single-character predicates for alphanumerics, cookie-octets, date delimiters, digits, and whitespace |
 | Month abbreviation lookup | Converts three-letter month abbreviations to their numeric index |
 | In-place substring replacement | Replaces all occurrences of a substring within a string |
+| Delimiter splitting | Splits a view into non-empty tokens on a delimiter character |
 | Lowercasing | Produces a lowercased copy of a string |
 | Trimming | Removes leading/trailing whitespace from a view in place |
 
@@ -172,6 +174,16 @@ Replaces every non-overlapping occurrence of `_original` in `_string` with `_rep
 
 [↑ Top](#table-of-contents)
 
+### split
+
+```cpp
+std::vector<std::string_view> split(std::string_view s, char delim) noexcept;
+```
+
+Splits `s` on `delim` into a vector of non-empty `std::string_view` tokens. Consecutive delimiters and leading/trailing delimiters do not produce empty tokens. An empty `s`, or one consisting only of delimiters, yields an empty vector. The returned views reference `s`'s storage and are only valid as long as `s` remains valid.
+
+[↑ Top](#table-of-contents)
+
 ### to_lower
 
 ```cpp
@@ -186,9 +198,12 @@ Writes a lowercased copy of `_string` into `out`. `_string` itself is not modifi
 
 ```cpp
 void trim(std::string_view& s) noexcept;
+void trim(std::string_view s, std::string& out) noexcept;
 ```
 
-Trims leading and trailing whitespace from `s` in place by adjusting the view's bounds. No copy or allocation occurs.
+Trims leading and trailing whitespace.  
+The first overload trims `s` in place by adjusting the view's bounds, with no copy or allocation.  
+The second overload leaves `s` untouched and writes the trimmed result into `out`, for callers that need an owned `std::string` rather than a view.
 
 [↑ Top](#table-of-contents)
 
@@ -223,6 +238,7 @@ using slim::common::utilities::is_digit;
 using slim::common::utilities::is_space;
 using slim::common::utilities::month_abbr_to_int;
 using slim::common::utilities::replace_all;
+using slim::common::utilities::split;
 using slim::common::utilities::to_lower;
 using slim::common::utilities::trim;
 
@@ -250,6 +266,9 @@ int month = month_abbr_to_int("Feb"); // -> 1
 std::string s = "a-b-c";
 replace_all(s, "-", "_"); // s -> "a_b_c"
 
+// Delimiter splitting
+auto tokens = split("a;;b;c;", ';'); // -> {"a", "b", "c"}
+
 // Lowercasing
 std::string lower;
 to_lower("Set-Cookie", lower); // lower -> "set-cookie"
@@ -257,6 +276,10 @@ to_lower("Set-Cookie", lower); // lower -> "set-cookie"
 // Trimming a view in place
 std::string_view view = "   trim me   ";
 trim(view); // view -> "trim me"
+
+// Trimming into an owned string, leaving the source view untouched
+std::string trimmed;
+trim(std::string_view("   trim me too   "), trimmed); // trimmed -> "trim me too"
 ```
 
 [↑ Top](#table-of-contents)
