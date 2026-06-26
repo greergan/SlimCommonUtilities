@@ -1,5 +1,5 @@
-#ifndef SLIM__COMMON__UTILITIES__H
-#define SLIM__COMMON__UTILITIES__H
+#ifndef SLIM_COMMON_UTILITIES_H
+#define SLIM_COMMON_UTILITIES_H
 
 #define SLIMCOMMONUTILITIES_VERSION "@SLIMCOMMONUTILITIES_VERSION@"
 #define SLIMCOMMONUTILITIES_GIT_HASH "@SLIMCOMMONUTILITIES_GIT_HASH@"
@@ -22,11 +22,10 @@ namespace slim::common::utilities {
     bool is_space(char c) noexcept;
     int month_abbr_to_int(std::string_view s) noexcept;
     void replace_all(std::string& _string, std::string_view _original, std::string_view _replacement) noexcept;
-    std::vector<std::string_view> split(std::string_view s, char delim) noexcept;
     void split(std::string_view s, char delim, std::vector<std::string>& buf) noexcept;
     void to_lower(std::string_view _string, std::string& out) noexcept;
     void trim(std::string_view& s) noexcept;
     void trim(std::string_view s, std::string& out) noexcept;
 }
 
-#endif // SLIM__COMMON__UTILITIES__H
+#endif // SLIM_COMMON_UTILITIES_H

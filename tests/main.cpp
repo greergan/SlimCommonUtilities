@@ -545,65 +545,8 @@ TEST_CASE("trim", "[trim]") {
 
 // ─── split ───────────────────────────────────────────────────────────────────
 
-TEST_CASE("split", "[split]") {
-    using slim::common::utilities::split;
-
-    SECTION("basic split on delimiter") {
-        auto tokens = split("a;b;c", ';');
-        REQUIRE(tokens.size() == 3);
-        REQUIRE(tokens[0] == "a");
-        REQUIRE(tokens[1] == "b");
-        REQUIRE(tokens[2] == "c");
-    }
-
-    SECTION("no delimiter present returns single token") {
-        auto tokens = split("hello", ';');
-        REQUIRE(tokens.size() == 1);
-        REQUIRE(tokens[0] == "hello");
-    }
-
-    SECTION("empty string returns no tokens") {
-        auto tokens = split("", ';');
-        REQUIRE(tokens.empty());
-    }
-
-    SECTION("consecutive delimiters produce no empty tokens") {
-        auto tokens = split("a;;b", ';');
-        REQUIRE(tokens.size() == 2);
-        REQUIRE(tokens[0] == "a");
-        REQUIRE(tokens[1] == "b");
-    }
-
-    SECTION("leading delimiter is skipped") {
-        auto tokens = split(";a;b", ';');
-        REQUIRE(tokens.size() == 2);
-        REQUIRE(tokens[0] == "a");
-        REQUIRE(tokens[1] == "b");
-    }
-
-    SECTION("trailing delimiter produces no trailing empty token") {
-        auto tokens = split("a;b;", ';');
-        REQUIRE(tokens.size() == 2);
-        REQUIRE(tokens[0] == "a");
-        REQUIRE(tokens[1] == "b");
-    }
-
-    SECTION("string of only delimiters returns no tokens") {
-        auto tokens = split(";;;", ';');
-        REQUIRE(tokens.empty());
-    }
-
-    SECTION("different delimiter character") {
-        auto tokens = split("name=value", '=');
-        REQUIRE(tokens.size() == 2);
-        REQUIRE(tokens[0] == "name");
-        REQUIRE(tokens[1] == "value");
-    }
-}
-
-using slim::common::utilities::split;
-
 TEST_CASE("split (string buffer overload)", "[utilities][split]") {
+    using slim::common::utilities::split;
     std::vector<std::string> buf;
 
     SECTION("empty input produces no tokens") {
@@ -657,12 +600,23 @@ TEST_CASE("split (string buffer overload)", "[utilities][split]") {
         REQUIRE(buf[0] == "hello");
     }
 
-    SECTION("buf is cleared before populating") {
-        buf = {"stale", "data"};
+    SECTION("buf accumulates across multiple calls") {
+        buf = {"existing"};
         split("a,b", ',', buf);
-        REQUIRE(buf.size() == 2);
+        REQUIRE(buf.size() == 3);
+        REQUIRE(buf[0] == "existing");
+        REQUIRE(buf[1] == "a");
+        REQUIRE(buf[2] == "b");
+    }
+
+    SECTION("two consecutive calls append rather than replace") {
+        split("a,b", ',', buf);
+        split("c,d", ',', buf);
+        REQUIRE(buf.size() == 4);
         REQUIRE(buf[0] == "a");
         REQUIRE(buf[1] == "b");
+        REQUIRE(buf[2] == "c");
+        REQUIRE(buf[3] == "d");
     }
 
     SECTION("single character delimiter token") {

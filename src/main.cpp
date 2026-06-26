@@ -119,21 +119,7 @@ void replace_all(std::string& _string, std::string_view _original, std::string_v
     }
 }
 
-std::vector<std::string_view> split(std::string_view s, char delim) noexcept {
-    std::vector<std::string_view> tokens;
-    size_t start = 0;
-    size_t end = s.find(delim);
-    while (end != std::string_view::npos) {
-        if (start != end) tokens.push_back(s.substr(start, end - start));
-        start = end + 1;
-        end = s.find(delim, start);
-    }
-    if (start < s.size()) tokens.push_back(s.substr(start));
-    return tokens;
-}
-
 void split(std::string_view s, char delim, std::vector<std::string>& buf) noexcept {
-    buf.clear();
     size_t start = 0;
     size_t end   = s.find(delim);
     while (end != std::string_view::npos) {

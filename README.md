@@ -56,7 +56,7 @@ This library provides a small set of free functions used across the Slim* librar
 | Character classification | Single-character predicates for alphabetics, alphanumerics, cookie-octets, date delimiters, digits, and whitespace |
 | Month abbreviation lookup | Converts three-letter month abbreviations to their numeric index |
 | In-place substring replacement | Replaces all occurrences of a substring within a string |
-| Delimiter splitting | Splits a view into non-empty tokens on a delimiter character, either as owned views or into an owned-string buffer |
+| Delimiter splitting | Splits a view into non-empty string tokens on a delimiter character, written into a caller-supplied buffer |
 | Lowercasing | Produces a lowercased copy of a string |
 | Trimming | Removes leading/trailing whitespace from a view in place |
 
@@ -189,15 +189,12 @@ Replaces every non-overlapping occurrence of `_original` in `_string` with `_rep
 ### split
 
 ```cpp
-std::vector<std::string_view> split(std::string_view s, char delim) noexcept;
-void                          split(std::string_view s, char delim, std::vector<std::string>& buf) noexcept;
+void split(std::string_view s, char delim, std::vector<std::string>& buf) noexcept;
 ```
 
-Splits `s` on `delim` into non-empty tokens. Consecutive delimiters and leading/trailing delimiters do not produce empty tokens. An empty `s`, or one consisting only of delimiters, yields no tokens.
+Splits `s` on `delim` into non-empty tokens, appended to `buf` as owned `std::string`s. Consecutive delimiters and leading/trailing delimiters do not produce empty tokens. An empty `s`, or one consisting only of delimiters, appends nothing.
 
-The first overload returns a `std::vector<std::string_view>`. The returned views reference `s`'s storage and are only valid as long as `s` remains valid.
-
-The second overload writes owned `std::string` tokens into `buf`, clearing any existing contents first. Use this when the tokens need to outlive `s`, or when the caller wants to reuse the same buffer across multiple calls without per-call allocation of the vector itself.
+This overload **appends** to `buf` rather than clearing it first — useful for accumulating tokens across multiple calls without per-call allocation of a new vector. Callers that want a fresh result set for each call should clear `buf` themselves beforehand.
 
 [↑ Top](#table-of-contents)
 
@@ -288,12 +285,10 @@ int month = month_abbr_to_int("Feb"); // -> 1
 std::string s = "a-b-c";
 replace_all(s, "-", "_"); // s -> "a_b_c"
 
-// Delimiter splitting into owned views
-auto tokens = split("a;;b;c;", ';'); // -> {"a", "b", "c"}
-
-// Delimiter splitting into an owned-string buffer (reusable across calls)
+// Delimiter splitting into a caller-supplied buffer (appends across calls)
 std::vector<std::string> buf;
 split("a;;b;c;", ';', buf); // buf -> {"a", "b", "c"}
+split("d;e", ';', buf);     // buf -> {"a", "b", "c", "d", "e"} (appended, not replaced)
 
 // Lowercasing
 std::string lower;
