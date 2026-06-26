@@ -600,3 +600,73 @@ TEST_CASE("split", "[split]") {
         REQUIRE(tokens[1] == "value");
     }
 }
+
+using slim::common::utilities::split;
+
+TEST_CASE("split (string buffer overload)", "[utilities][split]") {
+    std::vector<std::string> buf;
+
+    SECTION("empty input produces no tokens") {
+        split("", ',', buf);
+        REQUIRE(buf.empty());
+    }
+
+    SECTION("single token with no delimiter") {
+        split("hello", ',', buf);
+        REQUIRE(buf.size() == 1);
+        REQUIRE(buf[0] == "hello");
+    }
+
+    SECTION("basic multi-token split") {
+        split("a,b,c", ',', buf);
+        REQUIRE(buf.size() == 3);
+        REQUIRE(buf[0] == "a");
+        REQUIRE(buf[1] == "b");
+        REQUIRE(buf[2] == "c");
+    }
+
+    SECTION("leading delimiter is skipped") {
+        split(",a,b", ',', buf);
+        REQUIRE(buf.size() == 2);
+        REQUIRE(buf[0] == "a");
+        REQUIRE(buf[1] == "b");
+    }
+
+    SECTION("trailing delimiter is skipped") {
+        split("a,b,", ',', buf);
+        REQUIRE(buf.size() == 2);
+        REQUIRE(buf[0] == "a");
+        REQUIRE(buf[1] == "b");
+    }
+
+    SECTION("consecutive delimiters produce no empty tokens") {
+        split("a,,b", ',', buf);
+        REQUIRE(buf.size() == 2);
+        REQUIRE(buf[0] == "a");
+        REQUIRE(buf[1] == "b");
+    }
+
+    SECTION("string consisting only of delimiters") {
+        split(",,,", ',', buf);
+        REQUIRE(buf.empty());
+    }
+
+    SECTION("delimiter not present in string") {
+        split("hello", ';', buf);
+        REQUIRE(buf.size() == 1);
+        REQUIRE(buf[0] == "hello");
+    }
+
+    SECTION("buf is cleared before populating") {
+        buf = {"stale", "data"};
+        split("a,b", ',', buf);
+        REQUIRE(buf.size() == 2);
+        REQUIRE(buf[0] == "a");
+        REQUIRE(buf[1] == "b");
+    }
+
+    SECTION("single character delimiter token") {
+        split("a", 'a', buf);
+        REQUIRE(buf.empty());
+    }
+}

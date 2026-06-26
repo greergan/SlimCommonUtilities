@@ -32,6 +32,7 @@ CI/CD supplied by unified workflows provided by [SlimLibraryPackager](https://co
   - [trim](#trim)
 - [Building](#building)
 - [Dependencies](#dependencies)
+  - [required_packages](#required_packages)
 - [Examples](#examples)
 
 ## Overview
@@ -55,7 +56,7 @@ This library provides a small set of free functions used across the Slim* librar
 | Character classification | Single-character predicates for alphabetics, alphanumerics, cookie-octets, date delimiters, digits, and whitespace |
 | Month abbreviation lookup | Converts three-letter month abbreviations to their numeric index |
 | In-place substring replacement | Replaces all occurrences of a substring within a string |
-| Delimiter splitting | Splits a view into non-empty tokens on a delimiter character |
+| Delimiter splitting | Splits a view into non-empty tokens on a delimiter character, either as owned views or into an owned-string buffer |
 | Lowercasing | Produces a lowercased copy of a string |
 | Trimming | Removes leading/trailing whitespace from a view in place |
 
@@ -189,9 +190,14 @@ Replaces every non-overlapping occurrence of `_original` in `_string` with `_rep
 
 ```cpp
 std::vector<std::string_view> split(std::string_view s, char delim) noexcept;
+void                          split(std::string_view s, char delim, std::vector<std::string>& buf) noexcept;
 ```
 
-Splits `s` on `delim` into a vector of non-empty `std::string_view` tokens. Consecutive delimiters and leading/trailing delimiters do not produce empty tokens. An empty `s`, or one consisting only of delimiters, yields an empty vector. The returned views reference `s`'s storage and are only valid as long as `s` remains valid.
+Splits `s` on `delim` into non-empty tokens. Consecutive delimiters and leading/trailing delimiters do not produce empty tokens. An empty `s`, or one consisting only of delimiters, yields no tokens.
+
+The first overload returns a `std::vector<std::string_view>`. The returned views reference `s`'s storage and are only valid as long as `s` remains valid.
+
+The second overload writes owned `std::string` tokens into `buf`, clearing any existing contents first. Use this when the tokens need to outlive `s`, or when the caller wants to reuse the same buffer across multiple calls without per-call allocation of the vector itself.
 
 [↑ Top](#table-of-contents)
 
@@ -225,6 +231,8 @@ This library is built using [SlimLibraryPackager](https://codeberg.org/greergan/
 [↑ Top](#table-of-contents)
 
 ## Dependencies
+
+### required_packages
 
 External package dependencies for this library are declared in the [`required_packages`](required_packages) file at the repository root. This file is read by [SlimLibraryPackager](https://codeberg.org/greergan/SlimLibraryPackager) during the build process to resolve dependencies and install them if not present.
 
@@ -280,8 +288,12 @@ int month = month_abbr_to_int("Feb"); // -> 1
 std::string s = "a-b-c";
 replace_all(s, "-", "_"); // s -> "a_b_c"
 
-// Delimiter splitting
+// Delimiter splitting into owned views
 auto tokens = split("a;;b;c;", ';'); // -> {"a", "b", "c"}
+
+// Delimiter splitting into an owned-string buffer (reusable across calls)
+std::vector<std::string> buf;
+split("a;;b;c;", ';', buf); // buf -> {"a", "b", "c"}
 
 // Lowercasing
 std::string lower;
