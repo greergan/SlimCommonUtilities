@@ -123,11 +123,19 @@ void split(std::string_view s, char delim, std::vector<std::string>& buf) noexce
     size_t start = 0;
     size_t end   = s.find(delim);
     while (end != std::string_view::npos) {
-        if (start != end) buf.emplace_back(s.substr(start, end - start));
+        if (start != end) {
+            std::string_view view = s.substr(start, end - start);
+            trim(view);
+            buf.emplace_back(view);
+        }
         start = end + 1;
         end   = s.find(delim, start);
     }
-    if (start < s.size()) buf.emplace_back(s.substr(start));
+    if (start < s.size()) {
+        std::string_view view = s.substr(start);
+        trim(view);
+        buf.emplace_back(view);
+    }
 }
 
 void to_lower(std::string_view _string, std::string& out) noexcept {

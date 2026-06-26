@@ -192,7 +192,7 @@ Replaces every non-overlapping occurrence of `_original` in `_string` with `_rep
 void split(std::string_view s, char delim, std::vector<std::string>& buf) noexcept;
 ```
 
-Splits `s` on `delim` into non-empty tokens, appended to `buf` as owned `std::string`s. Consecutive delimiters and leading/trailing delimiters do not produce empty tokens. An empty `s`, or one consisting only of delimiters, appends nothing.
+Splits `s` on `delim` into non-empty tokens, appended to `buf` as owned, trimmed `std::string`s. Consecutive delimiters and leading/trailing delimiters do not produce empty tokens. An empty `s`, or one consisting only of delimiters, appends nothing.
 
 This overload **appends** to `buf` rather than clearing it first — useful for accumulating tokens across multiple calls without per-call allocation of a new vector. Callers that want a fresh result set for each call should clear `buf` themselves beforehand.
 
