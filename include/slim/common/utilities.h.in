@@ -22,6 +22,7 @@ namespace slim::common::utilities {
     bool is_space(char c) noexcept;
     int month_abbr_to_int(std::string_view s) noexcept;
     void replace_all(std::string& _string, std::string_view _original, std::string_view _replacement) noexcept;
+    std::vector<std::string_view> split(std::string_view s, char delim) noexcept;
     void split(std::string_view s, char delim, std::vector<std::string>& buf) noexcept;
     void to_lower(std::string_view _string, std::string& out) noexcept;
     void trim(std::string_view& s) noexcept;
