@@ -700,3 +700,201 @@ TEST_CASE("is_valid_percent_encoding", "[utilities]") {
         REQUIRE_FALSE(is_valid_percent_encoding("%20", 2));
     }
 }
+
+using slim::common::utilities::percent_decode;
+using slim::common::utilities::percent_encode;
+
+TEST_CASE("percent_encode", "[utilities]") {
+    std::string out;
+
+    SECTION("unreserved characters pass through unencoded") {
+        percent_encode("abcdefghijklmnopqrstuvwxyz", out);
+        REQUIRE(out == "abcdefghijklmnopqrstuvwxyz");
+
+        percent_encode("ABCDEFGHIJKLMNOPQRSTUVWXYZ", out);
+        REQUIRE(out == "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
+        percent_encode("0123456789", out);
+        REQUIRE(out == "0123456789");
+
+        percent_encode("*-._", out);
+        REQUIRE(out == "*-._");
+    }
+
+    SECTION("space encodes to plus") {
+        percent_encode(" ", out);
+        REQUIRE(out == "+");
+
+        percent_encode("hello world", out);
+        REQUIRE(out == "hello+world");
+
+        percent_encode("  ", out);
+        REQUIRE(out == "++");
+    }
+
+    SECTION("special ASCII characters are percent-encoded") {
+        percent_encode("~", out);
+        REQUIRE(out == "%7E");
+
+        percent_encode("=", out);
+        REQUIRE(out == "%3D");
+
+        percent_encode("&", out);
+        REQUIRE(out == "%26");
+
+        percent_encode("+", out);
+        REQUIRE(out == "%2B");
+
+        percent_encode("/", out);
+        REQUIRE(out == "%2F");
+
+        percent_encode("?", out);
+        REQUIRE(out == "%3F");
+
+        percent_encode("#", out);
+        REQUIRE(out == "%23");
+
+        percent_encode("@", out);
+        REQUIRE(out == "%40");
+    }
+
+    SECTION("non-ASCII bytes are percent-encoded byte by byte") {
+        // ä = U+00E4 = UTF-8: 0xC3 0xA4
+        percent_encode("\xC3\xA4", out);
+        REQUIRE(out == "%C3%A4");
+
+        // ü = U+00FC = UTF-8: 0xC3 0xBC
+        percent_encode("\xC3\xBC", out);
+        REQUIRE(out == "%C3%BC");
+
+        // ß = U+00DF = UTF-8: 0xC3 0x9F
+        percent_encode("\xC3\x9F", out);
+        REQUIRE(out == "%C3%9F");
+    }
+
+    SECTION("mixed content encodes correctly") {
+        percent_encode("name=John Doe", out);
+        REQUIRE(out == "name%3DJohn+Doe");
+
+        percent_encode("q=ä&lang=de", out);
+        REQUIRE(out == "q%3D%C3%A4%26lang%3Dde");
+    }
+
+    SECTION("empty string produces empty output") {
+        percent_encode("", out);
+        REQUIRE(out.empty());
+    }
+
+    SECTION("control characters are percent-encoded") {
+        percent_encode("\x01", out);
+        REQUIRE(out == "%01");
+
+        percent_encode("\x1F", out);
+        REQUIRE(out == "%1F");
+
+        percent_encode("\x7F", out);
+        REQUIRE(out == "%7F");
+    }
+}
+
+TEST_CASE("percent_decode", "[utilities]") {
+    std::string out;
+
+    SECTION("plain ASCII passes through unchanged") {
+        percent_decode("hello", out);
+        REQUIRE(out == "hello");
+
+        percent_decode("abc123", out);
+        REQUIRE(out == "abc123");
+    }
+
+    SECTION("plus decodes to space") {
+        percent_decode("+", out);
+        REQUIRE(out == " ");
+
+        percent_decode("hello+world", out);
+        REQUIRE(out == "hello world");
+
+        percent_decode("++", out);
+        REQUIRE(out == "  ");
+    }
+
+    SECTION("valid percent-encoded triplets are decoded") {
+        percent_decode("%41", out);
+        REQUIRE(out == "A");
+
+        percent_decode("%61", out);
+        REQUIRE(out == "a");
+
+        percent_decode("%20", out);
+        REQUIRE(out == " ");
+
+        percent_decode("%2F", out);
+        REQUIRE(out == "/");
+
+        percent_decode("%3D", out);
+        REQUIRE(out == "=");
+
+        percent_decode("%26", out);
+        REQUIRE(out == "&");
+    }
+
+    SECTION("lowercase hex in triplets is decoded") {
+        percent_decode("%2f", out);
+        REQUIRE(out == "/");
+
+        percent_decode("%3d", out);
+        REQUIRE(out == "=");
+    }
+
+    SECTION("non-ASCII UTF-8 sequences are decoded") {
+        // ä = U+00E4 = UTF-8: 0xC3 0xA4
+        percent_decode("%C3%A4", out);
+        REQUIRE(out == "\xC3\xA4");
+
+        // ü = U+00FC = UTF-8: 0xC3 0xBC
+        percent_decode("%C3%BC", out);
+        REQUIRE(out == "\xC3\xBC");
+
+        // ß = U+00DF = UTF-8: 0xC3 0x9F
+        percent_decode("%C3%9F", out);
+        REQUIRE(out == "\xC3\x9F");
+    }
+
+    SECTION("invalid percent sequences are passed through as literals") {
+        percent_decode("%GG", out);
+        REQUIRE(out == "%GG");
+
+        percent_decode("%2", out);
+        REQUIRE(out == "%2");
+
+        percent_decode("%", out);
+        REQUIRE(out == "%");
+
+        percent_decode("%XY", out);
+        REQUIRE(out == "%XY");
+    }
+
+    SECTION("mixed valid and invalid sequences") {
+        percent_decode("%2F%GG%2F", out);
+        REQUIRE(out == "/%GG/");
+    }
+
+    SECTION("empty string produces empty output") {
+        percent_decode("", out);
+        REQUIRE(out.empty());
+    }
+
+    SECTION("encode then decode round-trips correctly") {
+        std::string encoded;
+        std::string decoded;
+
+        percent_encode("hello world & more ~ stuff", encoded);
+        percent_decode(encoded, decoded);
+        REQUIRE(decoded == "hello world & more ~ stuff");
+
+        percent_encode("\xC3\xA4\xC3\xBC\xC3\x9F", encoded);
+        percent_decode(encoded, decoded);
+        REQUIRE(decoded == "\xC3\xA4\xC3\xBC\xC3\x9F");
+    }
+}

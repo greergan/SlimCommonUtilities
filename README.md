@@ -28,6 +28,8 @@ CI/CD supplied by unified workflows provided by [SlimLibraryPackager](https://co
   - [is_valid_percent_encoding](#is_valid_percent_encoding)
   - [is_xdigit](#is_xdigit)
   - [month_abbr_to_int](#month_abbr_to_int)
+  - [percent_decode](#percent_decode)
+  - [percent_encode](#percent_encode)
   - [replace_all](#replace_all)
   - [split](#split)
   - [to_lower](#to_lower)
@@ -57,6 +59,7 @@ This library provides a small set of free functions used across the Slim* librar
 | Case-insensitive comparison | Two variants (`iequals` / `iiequals`) for comparing strings |
 | Character classification | Single-character predicates for alphabetics, alphanumerics, cookie-octets, date delimiters, digits, whitespace, and hex digits; plus percent-encoding validation |
 | Month abbreviation lookup | Converts three-letter month abbreviations to their numeric index |
+| Percent encoding | Encode and decode strings using `application/x-www-form-urlencoded` percent-encoding, matching Node.js `URLSearchParams` behavior |
 | In-place substring replacement | Replaces all occurrences of a substring within a string |
 | Delimiter splitting | Splits a view into non-empty tokens on a delimiter character, either as owned views or into an owned-string buffer |
 | Lowercasing | Produces a lowercased copy of a string |
@@ -198,6 +201,26 @@ Converts a three-letter month abbreviation (e.g. `"Jan"`, `"Dec"`) to its 0-base
 
 [↑ Top](#table-of-contents)
 
+### percent_decode
+
+```cpp
+void percent_decode(std::string_view s, std::string& out) noexcept;
+```
+
+Decodes a `application/x-www-form-urlencoded` percent-encoded string into `out`, matching Node.js `URLSearchParams` behavior. `+` is decoded as a space. Valid `%xx` triplets are decoded to their byte value. Invalid `%xx` sequences (where one or both hex digits are missing or not valid hex) are passed through as literal characters unchanged.
+
+[↑ Top](#table-of-contents)
+
+### percent_encode
+
+```cpp
+void percent_encode(std::string_view s, std::string& out) noexcept;
+```
+
+Encodes `s` into `out` using `application/x-www-form-urlencoded` percent-encoding, matching Node.js `URLSearchParams` behavior. The safe set — characters that pass through unencoded — is `*`, `-`, `.`, `0`–`9`, `A`–`Z`, `_`, `a`–`z`. Space is encoded as `+`. All other bytes, including non-ASCII UTF-8 bytes, are encoded as `%XX` uppercase hex, one triplet per byte.
+
+[↑ Top](#table-of-contents)
+
 ### replace_all
 
 ```cpp
@@ -281,6 +304,8 @@ using slim::common::utilities::is_space;
 using slim::common::utilities::is_valid_percent_encoding;
 using slim::common::utilities::is_xdigit;
 using slim::common::utilities::month_abbr_to_int;
+using slim::common::utilities::percent_decode;
+using slim::common::utilities::percent_encode;
 using slim::common::utilities::replace_all;
 using slim::common::utilities::split;
 using slim::common::utilities::to_lower;
@@ -310,6 +335,17 @@ bool a9 = is_xdigit('g');          // -> false
 // Percent-encoding validation
 const char* enc = "%2F rest";
 bool valid = is_valid_percent_encoding(enc, 8); // -> true
+
+// Percent encoding (application/x-www-form-urlencoded, matches Node.js URLSearchParams)
+std::string encoded;
+percent_encode("hello world & more", encoded); // -> "hello+world+%26+more"
+percent_encode("\xC3\xA4",           encoded); // -> "%C3%A4"  (ä, UTF-8 encoded byte by byte)
+
+// Percent decoding
+std::string decoded;
+percent_decode("hello+world+%26+more", decoded); // -> "hello world & more"
+percent_decode("%C3%A4",              decoded); // -> "\xC3\xA4"  (ä)
+percent_decode("%GG",                 decoded); // -> "%GG"  (invalid sequence passed through)
 
 // Month abbreviation lookup
 int month = month_abbr_to_int("Feb"); // -> 1

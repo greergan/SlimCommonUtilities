@@ -17,9 +17,11 @@ namespace slim::common::utilities {
     bool is_date_delimiter(char c) noexcept;
     bool is_digit(char c) noexcept;
     bool is_space(char c) noexcept;
-    bool is_xdigit(char c) noexcept;
     bool is_valid_percent_encoding(const char* p, std::size_t remaining) noexcept;
+    bool is_xdigit(char c) noexcept;
     int month_abbr_to_int(std::string_view s) noexcept;
+    void percent_decode(std::string_view s, std::string& out) noexcept;
+    void percent_encode(std::string_view s, std::string& out) noexcept;
     void replace_all(std::string& _string, std::string_view _original, std::string_view _replacement) noexcept;
     std::vector<std::string_view> split(std::string_view s, char delim) noexcept;
     void split(std::string_view s, char delim, std::vector<std::string>& buf) noexcept;
