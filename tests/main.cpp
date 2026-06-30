@@ -624,3 +624,79 @@ TEST_CASE("split (string buffer overload)", "[utilities][split]") {
         REQUIRE(buf.empty());
     }
 }
+
+using slim::common::utilities::is_valid_percent_encoding;
+using slim::common::utilities::is_xdigit;
+
+TEST_CASE("is_xdigit", "[utilities]") {
+    SECTION("decimal digits are valid") {
+        for (char c = '0'; c <= '9'; ++c)
+            REQUIRE(is_xdigit(c));
+    }
+    SECTION("lowercase hex letters are valid") {
+        for (char c = 'a'; c <= 'f'; ++c)
+            REQUIRE(is_xdigit(c));
+    }
+    SECTION("uppercase hex letters are valid") {
+        for (char c = 'A'; c <= 'F'; ++c)
+            REQUIRE(is_xdigit(c));
+    }
+    SECTION("letters past hex range are invalid") {
+        for (char c = 'g'; c <= 'z'; ++c)
+            REQUIRE_FALSE(is_xdigit(c));
+        for (char c = 'G'; c <= 'Z'; ++c)
+            REQUIRE_FALSE(is_xdigit(c));
+    }
+    SECTION("non-alphanumeric characters are invalid") {
+        REQUIRE_FALSE(is_xdigit(' '));
+        REQUIRE_FALSE(is_xdigit('%'));
+        REQUIRE_FALSE(is_xdigit('/'));
+        REQUIRE_FALSE(is_xdigit('\0'));
+        REQUIRE_FALSE(is_xdigit('\x7F'));
+    }
+}
+
+TEST_CASE("is_valid_percent_encoding", "[utilities]") {
+    SECTION("valid lowercase hex triplets") {
+        REQUIRE(is_valid_percent_encoding("%2f", 3));
+        REQUIRE(is_valid_percent_encoding("%af", 3));
+        REQUIRE(is_valid_percent_encoding("%ff", 3));
+    }
+    SECTION("valid uppercase hex triplets") {
+        REQUIRE(is_valid_percent_encoding("%2F", 3));
+        REQUIRE(is_valid_percent_encoding("%AF", 3));
+        REQUIRE(is_valid_percent_encoding("%FF", 3));
+    }
+    SECTION("valid mixed-case hex triplets") {
+        REQUIRE(is_valid_percent_encoding("%aF", 3));
+        REQUIRE(is_valid_percent_encoding("%Af", 3));
+    }
+    SECTION("valid triplet with trailing content") {
+        const char* s = "%2Frest";
+        REQUIRE(is_valid_percent_encoding(s, 7));
+    }
+    SECTION("remaining too small") {
+        REQUIRE_FALSE(is_valid_percent_encoding("%2F", 1));
+        REQUIRE_FALSE(is_valid_percent_encoding("%2F", 2));
+    }
+    SECTION("invalid first hex digit") {
+        REQUIRE_FALSE(is_valid_percent_encoding("%g0", 3));
+        REQUIRE_FALSE(is_valid_percent_encoding("%!0", 3));
+        REQUIRE_FALSE(is_valid_percent_encoding("% 0", 3));
+    }
+    SECTION("invalid second hex digit") {
+        REQUIRE_FALSE(is_valid_percent_encoding("%0g", 3));
+        REQUIRE_FALSE(is_valid_percent_encoding("%0!", 3));
+        REQUIRE_FALSE(is_valid_percent_encoding("%0 ", 3));
+    }
+    SECTION("both hex digits invalid") {
+        REQUIRE_FALSE(is_valid_percent_encoding("%gg", 3));
+        REQUIRE_FALSE(is_valid_percent_encoding("%  ", 3));
+    }
+    SECTION("boundary: remaining exactly 3 is valid") {
+        REQUIRE(is_valid_percent_encoding("%20", 3));
+    }
+    SECTION("boundary: remaining exactly 2 is invalid") {
+        REQUIRE_FALSE(is_valid_percent_encoding("%20", 2));
+    }
+}

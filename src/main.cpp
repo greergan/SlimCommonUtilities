@@ -17,14 +17,16 @@ struct AsciiTables {
     std::array<bool, 256> is_space{};
     std::array<bool, 256> is_cookie_char{};
     std::array<bool, 256> is_date_delimiter{};
+    std::array<bool, 256> is_xdigit{};
 
     constexpr AsciiTables() noexcept {
         for (size_t i = 0; i < 256; ++i) {
-            to_lower[i] = (i >= 'A' && i <= 'Z') ? static_cast<char>(i + 32) : static_cast<char>(i);
-            is_alpha[i] = (i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z');
-            is_alnum[i] = is_alpha[i] || (i >= '0' && i <= '9');
-            is_digit[i] = (i >= '0' && i <= '9');
-            is_space[i] = (i == ' ' || i == '\t' || i == '\r' || i == '\n' || i == '\v' || i == '\f');
+            to_lower[i]  = (i >= 'A' && i <= 'Z') ? static_cast<char>(i + 32) : static_cast<char>(i);
+            is_alpha[i]  = (i >= 'a' && i <= 'z') || (i >= 'A' && i <= 'Z');
+            is_alnum[i]  = is_alpha[i] || (i >= '0' && i <= '9');
+            is_digit[i]  = (i >= '0' && i <= '9');
+            is_space[i]  = (i == ' ' || i == '\t' || i == '\r' || i == '\n' || i == '\v' || i == '\f');
+            is_xdigit[i] = is_digit[i] || (i >= 'a' && i <= 'f') || (i >= 'A' && i <= 'F');
 
             unsigned char uc = static_cast<unsigned char>(i);
             is_cookie_char[i] = (uc == 0x21) || (uc >= 0x23 && uc <= 0x2B) || (uc >= 0x2D && uc <= 0x3A) ||
@@ -93,6 +95,14 @@ bool is_digit(char c) noexcept {
 
 bool is_space(char c) noexcept {
     return ascii.is_space[static_cast<unsigned char>(c)];
+}
+
+bool is_xdigit(char c) noexcept {
+    return ascii.is_xdigit[static_cast<unsigned char>(c)];
+}
+
+bool is_valid_percent_encoding(const char* p, std::size_t remaining) noexcept {
+    return remaining > 2 && is_xdigit(p[1]) && is_xdigit(p[2]);
 }
 
 int month_abbr_to_int(std::string_view s) noexcept {

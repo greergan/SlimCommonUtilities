@@ -25,6 +25,8 @@ CI/CD supplied by unified workflows provided by [SlimLibraryPackager](https://co
   - [is_date_delimiter](#is_date_delimiter)
   - [is_digit](#is_digit)
   - [is_space](#is_space)
+  - [is_valid_percent_encoding](#is_valid_percent_encoding)
+  - [is_xdigit](#is_xdigit)
   - [month_abbr_to_int](#month_abbr_to_int)
   - [replace_all](#replace_all)
   - [split](#split)
@@ -53,7 +55,7 @@ This library provides a small set of free functions used across the Slim* librar
 | Digit counting | Fast digit count for unsigned 64-bit integers |
 | Boolean parsing | String-to-bool conversion for `TRUE`/`true`/`FALSE`/`false` |
 | Case-insensitive comparison | Two variants (`iequals` / `iiequals`) for comparing strings |
-| Character classification | Single-character predicates for alphabetics, alphanumerics, cookie-octets, date delimiters, digits, and whitespace |
+| Character classification | Single-character predicates for alphabetics, alphanumerics, cookie-octets, date delimiters, digits, whitespace, and hex digits; plus percent-encoding validation |
 | Month abbreviation lookup | Converts three-letter month abbreviations to their numeric index |
 | In-place substring replacement | Replaces all occurrences of a substring within a string |
 | Delimiter splitting | Splits a view into non-empty tokens on a delimiter character, either as owned views or into an owned-string buffer |
@@ -166,6 +168,26 @@ Returns `true` if `c` is one of the recognized ASCII whitespace characters: spac
 
 [↑ Top](#table-of-contents)
 
+### is_valid_percent_encoding
+
+```cpp
+bool is_valid_percent_encoding(const char* p, std::size_t remaining) noexcept;
+```
+
+Returns `true` if `p` points to the start of a valid percent-encoded triplet — i.e. `p[0]` is `%`, `remaining` is greater than `2`, and both `p[1]` and `p[2]` are valid hex digits. The caller is responsible for ensuring `p` is valid for at least `remaining` bytes.
+
+[↑ Top](#table-of-contents)
+
+### is_xdigit
+
+```cpp
+bool is_xdigit(char c) noexcept;
+```
+
+Returns `true` if `c` is an ASCII hex digit (`0`–`9`, `a`–`f`, `A`–`F`).
+
+[↑ Top](#table-of-contents)
+
 ### month_abbr_to_int
 
 ```cpp
@@ -256,6 +278,8 @@ using slim::common::utilities::is_cookie_char;
 using slim::common::utilities::is_date_delimiter;
 using slim::common::utilities::is_digit;
 using slim::common::utilities::is_space;
+using slim::common::utilities::is_valid_percent_encoding;
+using slim::common::utilities::is_xdigit;
 using slim::common::utilities::month_abbr_to_int;
 using slim::common::utilities::replace_all;
 using slim::common::utilities::split;
@@ -280,6 +304,12 @@ bool a4 = is_cookie_char('"');     // -> false
 bool a5 = is_date_delimiter(':');  // -> false
 bool a6 = is_digit('7');           // -> true
 bool a7 = is_space('\t');          // -> true
+bool a8 = is_xdigit('f');          // -> true
+bool a9 = is_xdigit('g');          // -> false
+
+// Percent-encoding validation
+const char* enc = "%2F rest";
+bool valid = is_valid_percent_encoding(enc, 8); // -> true
 
 // Month abbreviation lookup
 int month = month_abbr_to_int("Feb"); // -> 1
